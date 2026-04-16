@@ -1,0 +1,30 @@
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Quitamos el padding global para que cada sección maneje el suyo */
+  padding: 0; 
+  box-sizing: border-box;
+}
+
+.header {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.brand-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #333; /* Color oscuro para el cuerpo del nombre */
+    letter-spacing: 0.8px;
+}
+
+.brand-name span {
+    color: #007bff; /* El azul de tus botones para el acento */
+}

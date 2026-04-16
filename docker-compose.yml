@@ -1,0 +1,30 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_USER_FOLDER=/home/node/.n8n
+      - N8N_CORS_ENABLED=true
+      - N8N_CORS_ALLOW_ORIGIN=*
+      - N8N_FILE_STORAGE_DIRECTORY=/home/node/.n8n/files
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=16
+      - TZ=America/Argentina/Buenos_Aires
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./files:/home/node/files
+      - ./logs:/home/node/.n8n/logs
+    
+    # Esto es la clave: 1000 es tu usuario de Linux (kscod)
+    # Al poner esto, n8n tendrá los mismos permisos que tú sobre ./files
+    user: "${UID}:${GID}"
+
+volumes:
+  n8n_data:
+    driver: local

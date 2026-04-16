@@ -1,0 +1,62 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.brand-name {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.main-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espacio entre botones */
+    align-items: center;
+}
+
+/* LA CLAVE: El Link ahora es el botón completo */
+.menu-card {
+    text-decoration: none; /* Quita el subrayado del link */
+    width: 80%;
+    max-width: 320px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center; /* Alinea icono y texto horizontalmente */
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: transform 0.1s ease, background-color 0.2s;
+}
+
+/* Efecto visual al tocar (Feedback táctil) */
+.menu-card:active {
+    transform: scale(0.96);
+    background-color: #f0f7ff;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #444;
+    font-weight: 600;
+}
