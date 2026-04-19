@@ -2,7 +2,7 @@ import { Link, NavLink } from "react-router-dom";
 import "../../../css/navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Importamos los iconos que necesites
-import { faHouse, faChartBar, faCartShopping, faUser } from '@fortawesome/free-solid-svg-icons'; 
+import { faHouse, faChartBar, faCartShopping, faUser, faUtensils } from '@fortawesome/free-solid-svg-icons'; 
 
 export const Navbar = () => {
     return (
@@ -11,7 +11,6 @@ export const Navbar = () => {
                 <li className="nav-item">
                     <NavLink to="/home" className="nav-link">
                         <span className="icon">
-                            {/* Usa la variable faHouse directamente aquí */}
                             <FontAwesomeIcon icon={faHouse} />
                         </span>
                         <span className="text">Inicio</span>
@@ -31,6 +30,16 @@ export const Navbar = () => {
                             <FontAwesomeIcon icon={faCartShopping} />
                         </span>
                         <span className="text">Compras</span>
+                    </NavLink>
+                </li>
+
+                {/* NEW LINK FOR MEALS */}
+                <li className="nav-item">
+                    <NavLink to="/meals" className="nav-link">
+                        <span className="icon">
+                            <FontAwesomeIcon icon={faUtensils} />
+                        </span>
+                        <span className="text">Meals</span>
                     </NavLink>
                 </li>
 

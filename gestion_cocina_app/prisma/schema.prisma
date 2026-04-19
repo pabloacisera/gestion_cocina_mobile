@@ -12,6 +12,15 @@ enum Role {
   ADMIN
 }
 
+enum MeasureUnit {
+  KG
+  G
+  L
+  ML
+  UNIT
+  OTHER
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String?
@@ -25,21 +34,75 @@ model User {
 }
 
 model Provider {
-  id        Int      @id default(autoincrement())
-  name      String   @unique
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
   cuit      String?
   address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt    
+  products  Product[]
+  purchases Purchase[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt    
 }
 
 model Product {
-  id            Int      @id default(autoincrement())
+  id            Int      @id @default(autoincrement())
   providerId    Int
   name          String
   description   String?
   quantity      Int
-  unit          String
+  measureUnit   MeasureUnit @default(KG)
+  minStock      Int      @default(0)
 
-  provider      Provider @relation(fields: [providerId], references: [id])
+  provider      Provider         @relation(fields: [providerId], references: [id])
+  movements     StockMovement[]
+  mealIngredients MealIngredient[]
+  purchases     PurchaseItem[]
+}
+
+model StockMovement {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  type        String   // "IN" (compra) | "OUT" (uso en comida)
+  quantity    Int
+  reason      String?  // descripción opcional
+  createdAt   DateTime @default(now())
+  product     Product  @relation(fields: [productId], references: [id])
+}
+
+model Meal {
+  id          Int               @id @default(autoincrement())
+  name        String            // ej: "Almuerzo 18/04"
+  servedAt    DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+  ingredients MealIngredient[]
+}
+
+model MealIngredient {
+  id        Int     @id @default(autoincrement())
+  mealId    Int
+  productId Int
+  quantity  Int
+  meal      Meal    @relation(fields: [mealId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Purchase {
+  id          Int            @id @default(autoincrement())
+  providerId  Int
+  totalAmount Float
+  notes       String?
+  createdAt   DateTime       @default(now())
+  provider    Provider       @relation(fields: [providerId], references: [id])
+  items       PurchaseItem[]
+}
+
+model PurchaseItem {
+  id         Int      @id @default(autoincrement())
+  purchaseId Int
+  productId  Int
+  quantity   Int
+  unitPrice  Float
+  subtotal   Float
+  purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
 }

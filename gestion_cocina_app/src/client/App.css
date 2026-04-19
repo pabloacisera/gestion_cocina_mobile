@@ -1,30 +1,246 @@
-#root {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  /* Quitamos el padding global para que cada sección maneje el suyo */
-  padding: 0; 
-  box-sizing: border-box;
-}
-
 .header {
   width: 100%;
   height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
-  border-bottom: 1px solid #f0f0f0;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .brand-name {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #333; /* Color oscuro para el cuerpo del nombre */
-    letter-spacing: 0.8px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: 0.8px;
 }
 
 .brand-name span {
-    color: #007bff; /* El azul de tus botones para el acento */
+  color: var(--color-primary);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.1s;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e1;
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: #fff;
+  padding: 14px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn-success:hover {
+  background: #15803d;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  min-height: 120px;
+}
+
+.loading-indicator .fa-circle-notch {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.btn-back {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: var(--color-border);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: var(--color-surface);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-header h1 .fa-solid,
+.page-header h1 .fa-regular {
+  color: var(--color-primary);
+}
+
+.page-header-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  background: var(--color-surface);
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.page-header-centered h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-header-centered h1 .fa-solid,
+.page-header-centered h1 .fa-regular {
+  color: var(--color-primary);
+}
+
+.table-scroll-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 8px;
+}
+
+@media (max-width: 767px) {
+  .table-scroll-hint {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .table-scroll-hint {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .header {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .page-header,
+  .page-header-centered {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-container {
+    padding-top: 76px;
+  }
 }

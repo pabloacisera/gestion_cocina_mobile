@@ -1,87 +1,109 @@
-.form-container {
-    width: 90vw;
-    background-color: #f8f9fa;
-    height: auto;
-    margin: auto;
-    margin-top: 1rem;
-    border-radius: 8px;
+.new-provider-form {
+  padding: 20px;
+  background: var(--color-bg);
 }
 
-.form {
-    display: flex;
-    flex-direction: column;
+.new-provider-form .form-container {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.new-provider-form .form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.new-provider-form .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.new-provider-form .input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.new-provider-form .input-group input {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.new-provider-form .input-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.new-provider-form .advise {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.new-provider-form .button-section {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.new-provider-form .button-section button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.new-provider-form .button-section button:active {
+  transform: scale(0.98);
+}
+
+.new-provider-form .btn-save {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.new-provider-form .btn-save:hover {
+  background: #15803d;
+}
+
+.new-provider-form .btn-reset {
+  background: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.new-provider-form .btn-reset:hover {
+  background: #cbd5e1;
+}
+
+.new-provider-form .spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-primary);
+  font-size: 1.2rem;
+}
+
+.new-provider-form .spinner .fa-circle-notch {
+  animation: spin 1s linear infinite;
+}
+
+@media (min-width: 768px) {
+  .new-provider-form .form {
+    max-width: 500px;
     margin: 0 auto;
-}
-
-.input-group {
-    display: flex;
-    flex-direction: column;
-    width: 80%;
-    margin: 0 auto;
-    margin-top: 12px;
-    padding: 8px 12;
-}
-
-.input-group label {
-    margin-bottom: 7px;
-}
-
-.input-group input {
-    height: 30px;
-    outline: none;
-    border: none;
-    border-bottom: 0.7px solid grey;
-}
-
-.advise {
-    font-size: 12px;   
-    margin: auto;
-    margin-top: 12px;
-}
-
-.button-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* Para que el spinner y el botón se alineen verticalmente */
-    width: 60%;          /* Debe coincidir con el ancho de tus .input-group */
-    margin: 1.5rem auto; /* El 'auto' horizontal lo centra, el 1.5rem le da aire arriba */
-}
-
-.button-section button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-}
-
-.btn-save {
-    background-color: rgb(71, 143, 119);
-    color: white;
-}
-
-.btn-reset {
-    background-color: grey;
-    color: white;
-}
-
-.btn-save:active {
-    background-color: #f8f9fa;
-    border: 1px solid rgb(71, 143, 119);
-    color: rgb(71, 143, 119);
-    cursor: pointer;
-}
-
-.spinner {
-    display: inline-block; /* Necesario para que el transform funcione */
-    animation: rotate 1s linear infinite;
-    color: #007bff; /* O el color de tu marca */
-    font-size: 1.2rem;
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+  }
 }
