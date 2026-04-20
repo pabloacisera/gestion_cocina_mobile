@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBoxOpen, faPlus, faEdit, faTrashAlt, faCircleNotch, faExclamationTriangle, faAddressBook, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faBoxOpen, faPlus, faEdit, faTrashAlt, faCircleNotch, faExclamationTriangle, faAddressBook, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 
 import { ApiService } from '../services/ApiService';
@@ -39,12 +39,13 @@ export function Product() {
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>(null); // For form validation errors
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // State for the creation/editing form
-  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+  const [isFormVisible, setIsFormVisible] = useState<boolean>(!!filterProviderId);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [currentProductData, setCurrentProductData] = useState<ProductInput>({
-    providerId: 0,
+    providerId: filterProviderId ? parseInt(filterProviderId) : 0,
     name: '',
     description: '',
     quantity: 0,
@@ -57,11 +58,15 @@ export function Product() {
       const response = await ApiService.get<{ success: boolean; data: Provider[] }>('/api/providers');
       if (response.success) {
         setProviders(response.data);
+        // If we don't have a filterProviderId and current providerId is 0, set to first provider
+        if (!filterProviderId && response.data.length > 0 && currentProductData.providerId === 0) {
+          setCurrentProductData(prev => ({ ...prev, providerId: response.data[0].id }));
+        }
       } else {
-        toast.error(response.error || 'Error fetching providers.');
+        toast.error(response.error || 'Error al cargar proveedores.');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to fetch providers.');
+      toast.error(error.message || 'Error al cargar proveedores.');
     }
   };
 
@@ -78,10 +83,10 @@ export function Product() {
         setProducts(response.data);
         setPagination(response.pagination);
       } else {
-        setError(response.error || 'Failed to fetch products.');
+        setError(response.error || 'Error al cargar productos.');
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err.message || 'Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
     }
@@ -90,6 +95,12 @@ export function Product() {
   useEffect(() => {
     fetchProviders();
     fetchProducts();
+    // Pre-select provider and show form if filterProviderId is present in URL
+    if (filterProviderId && !isEditing) {
+      const targetId = parseInt(filterProviderId);
+      setCurrentProductData(prev => ({ ...prev, providerId: targetId }));
+      setIsFormVisible(true);
+    }
   }, [filterProviderId]);
 
   const handlePrevPage = () => {
@@ -128,7 +139,7 @@ export function Product() {
     if (!validation.success) {
       const flattenedErrors = validation.error.flatten();
       setErrors(flattenedErrors.fieldErrors);
-      toast.error('Please correct the errors in the form.');
+      toast.error('Por favor, corrija los errores en el formulario.');
       setIsSubmitting(false);
       return;
     }
@@ -139,27 +150,28 @@ export function Product() {
         // Update existing product
         response = await ApiService.put(`/api/products/${(currentProductData as any).id}`, validation.data);
         if (response.success) {
-          toast.success('Product updated successfully!');
+          toast.success('¡Producto actualizado correctamente!');
           setProducts(products.map(p => p.id === (currentProductData as any).id ? { ...validation.data, id: p.id, provider: providers.find(prov => prov.id === validation.data.providerId) || null } : p));
           setIsFormVisible(false); // Hide form after successful update
         } else {
-          toast.error(response.error || 'Error updating product.');
+          toast.error(response.error || 'Error al actualizar el producto.');
           if (response.errors) setErrors(response.errors);
         }
       } else {
         // Create new product
         response = await ApiService.post('/api/products', validation.data);
         if (response.success && response.data) {
-          toast.success('Product created successfully!');
+          toast.success('¡Producto creado correctamente!');
           setProducts([...products, { ...response.data, provider: providers.find(prov => prov.id === response.data.providerId) || null }]);
-          setCurrentProductData({ providerId: providers.length > 0 ? providers[0].id : 0, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 }); // Reset form
+          const defaultId = filterProviderId ? parseInt(filterProviderId) : (providers.length > 0 ? providers[0].id : 0);
+          setCurrentProductData({ providerId: defaultId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 }); // Reset form
         } else {
-          toast.error(response.error || 'Error creating product.');
+          toast.error(response.error || 'Error al crear el producto.');
           if (response.errors) setErrors(response.errors);
         }
       }
     } catch (error: any) {
-      toast.error(error.message || 'An unexpected error occurred.');
+      toast.error(error.message || 'Ocurrió un error inesperado.');
       console.error('Product submission error:', error);
     } finally {
       setIsSubmitting(false);
@@ -167,19 +179,19 @@ export function Product() {
   };
 
   const handleDeleteProduct = async (id: number, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete product "${name}"? This action cannot be undone.`)) {
+    if (!window.confirm(`¿Estás seguro de que querés eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
         return;
     }
     try {
         const response = await ApiService.delete(`/api/products/${id}`);
         if (response.success) {
-            toast.success(`Product "${name}" deleted successfully.`);
+            toast.success(`Producto "${name}" eliminado correctamente.`);
             setProducts(products.filter(p => p.id !== id)); // Remove from state
         } else {
-            toast.error(response.error || `Error deleting product "${name}".`);
+            toast.error(response.error || `Error al eliminar el producto "${name}".`);
         }
     } catch (error: any) {
-        toast.error(error.message || `Error deleting product "${name}".`);
+        toast.error(error.message || `Error al eliminar el producto "${name}".`);
         console.error("Error deleting product:", error);
     }
   };
@@ -197,7 +209,9 @@ export function Product() {
     setIsFormVisible(!isFormVisible);
     setIsEditing(false); // Reset editing state when hiding form
     // Reset form data if hiding, or keep it if toggling between list and form
-    setCurrentProductData({ providerId: providers.length > 0 ? providers[0].id : 0, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 });
+    // Respect filterProviderId if it exists
+    const defaultProviderId = filterProviderId ? parseInt(filterProviderId) : (providers.length > 0 ? providers[0].id : 0);
+    setCurrentProductData({ providerId: defaultProviderId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 });
     setErrors(null); // Clear errors when toggling
   };
 
@@ -216,6 +230,10 @@ export function Product() {
   const handleResetFilter = () => {
     navigate('/products');
   };
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="products-page">
@@ -344,14 +362,29 @@ export function Product() {
       
       <div className="products-list-section">
         {!isFormVisible && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-            <h2 style={{ margin: 0 }}>{filterProviderId ? `Insumos de: ${getProviderName() || '...'}` : 'Productos Existentes'}</h2>
-            {filterProviderId && (
-              <button onClick={handleResetFilter} className="btn-add-new" style={{ background: 'var(--color-text-secondary)', padding: '8px 16px', minHeight: 'auto' }}>
-                Ver Todos
-              </button>
-            )}
-          </div>
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+              <h2 style={{ margin: 0 }}>{filterProviderId ? `Insumos de: ${getProviderName() || '...'}` : 'Productos Existentes'}</h2>
+              {filterProviderId && (
+                <button onClick={handleResetFilter} className="btn-add-new" style={{ background: 'var(--color-text-secondary)', padding: '8px 16px', minHeight: 'auto' }}>
+                  Ver Todos
+                </button>
+              )}
+            </div>
+
+            <div className="search-container">
+              <div className="search-wrapper">
+                <FontAwesomeIcon icon={faSearch} className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Buscar producto..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+            </div>
+          </>
         )}
         {loading && (
           <div className="loading-indicator">
@@ -365,12 +398,12 @@ export function Product() {
             Error: {error}
           </div>
         )}
-        {!loading && !error && products.length === 0 && !isFormVisible && (
+        {!loading && !error && filteredProducts.length === 0 && !isFormVisible && (
           <div className="products-empty">
-            No hay productos. Agrega uno usando el formulario.
+            {searchTerm ? `No se encontraron productos que coincidan con "${searchTerm}".` : 'No hay productos. Agrega uno usando el formulario.'}
           </div>
         )}
-        {!loading && !error && products.length > 0 && !isFormVisible && (
+        {!loading && !error && filteredProducts.length > 0 && !isFormVisible && (
           <div className="products-table-container">
             <table className="products-table">
               <thead>
@@ -384,7 +417,7 @@ export function Product() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product.id}>
                     <td>{product.name}</td>
                     <td>{getProductDetails(product).providerName}</td>

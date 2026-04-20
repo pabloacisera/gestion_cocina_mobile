@@ -45,6 +45,11 @@
   padding: 20px;
   box-shadow: var(--shadow-md);
   margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .date-inputs {
@@ -138,7 +143,7 @@
   cursor: not-allowed;
 }
 
-.report-loading {
+.report-loading, .report-empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,14 +162,153 @@
 
 .report-empty {
   text-align: center;
-  padding: 40px 20px;
+}
+
+/* New styles for Expense Summary Card */
+.expense-summary-card {
+  background: var(--color-surface-secondary); /* Lighter background for distinction */
+  padding: 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 20px;
+}
+
+.expense-summary-card h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.expense-summary-card h2 .fa-solid {
+  color: var(--color-primary);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Default to single column on mobile */
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 500px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr); /* Two columns on larger screens */
+  }
+}
+
+.summary-item {
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-item h3 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--color-text-secondary);
+}
+
+.summary-item p {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.provider-expenses-table {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  overflow-x: auto; /* Added for horizontal scroll */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+.provider-expenses-table h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.provider-expenses-table table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 320px; /* Minimum width to ensure scroll */
+}
+
+.provider-expenses-table th,
+.provider-expenses-table td {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.provider-expenses-table th {
+  background: var(--color-bg);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.provider-expenses-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Styles for the Stock Movements section */
+.stock-movements-card {
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow: hidden; /* Ensure content is contained */
 }
 
-.report-table-container {
+.stock-movements-card h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stock-movements-card h2 .fa-solid {
+  color: var(--color-primary);
+}
+
+
+.purchases-detail-table {
+  margin-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.purchases-detail-table th {
+  background: var(--color-bg);
+  padding: 12px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.purchases-detail-table td {
+  padding: 12px 10px;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.purchases-detail-table tr:last-child td {
+  border-bottom: none;
+}
+
+.table-container {
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
@@ -172,7 +316,7 @@
   position: relative;
 }
 
-.report-table-container::after {
+.table-container::after {
   content: '';
   position: absolute;
   top: 0;
@@ -185,7 +329,7 @@
   transition: opacity 0.3s;
 }
 
-.report-table-container.scrollable::after {
+.table-container.scrollable::after {
   opacity: 1;
 }
 
@@ -214,10 +358,6 @@
 
 .report-table tr:last-child td {
   border-bottom: none;
-}
-
-.report-table tr:hover td {
-  background: var(--color-primary-light);
 }
 
 .report-table .type-in {

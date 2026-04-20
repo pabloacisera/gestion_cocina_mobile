@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { ApiService } from '../services/ApiService';
-import { Product } from '../../../prisma/client';
 import { MEASURE_UNIT_LABELS } from '../../server/schemas/productSchema';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle, faCircleNotch, faBoxesStacked, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faCircleNotch, faBoxesStacked, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { BackButton } from '../components/shared/BackButton';
 import '../../css/inventory.css';
+
+// Local product interface to avoid incorrect prisma client import
+interface Product {
+  id: number;
+  providerId: number;
+  name: string;
+  description: string | null;
+  measureUnit: string;
+  quantity: number;
+  minStock: number;
+}
 
 // Define a more specific type for the product with provider details
 interface ProductWithProvider extends Product {
@@ -30,6 +40,7 @@ export function Inventary() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0, totalPages: 0 });
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   const fetchProducts = async (page: number = 1) => {
     try {
@@ -40,10 +51,10 @@ export function Inventary() {
         setProducts(response.data);
         setPagination(response.pagination);
       } else {
-        setError(response.error || 'Failed to fetch products.');
+        setError(response.error || 'Error al cargar los productos del inventario.');
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err.message || 'Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
     }
@@ -91,6 +102,10 @@ export function Inventary() {
     }
   };
 
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="inventory-page">
@@ -121,13 +136,27 @@ export function Inventary() {
           <h1><FontAwesomeIcon icon={faBoxesStacked} /> Inventario</h1>
         </div>
       </div>
-      {products.length === 0 ? (
+
+      <div className="search-container">
+        <div className="search-wrapper">
+          <FontAwesomeIcon icon={faSearch} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Buscar en inventario..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+      </div>
+
+      {filteredProducts.length === 0 ? (
         <div className="inventory-empty">
-          No hay productos en el inventario.
+          {searchTerm ? `No se encontraron resultados para "${searchTerm}" en esta página.` : 'No hay productos en el inventario.'}
         </div>
       ) : (
         <ul className="product-list">
-          {products.map((product) => {
+          {filteredProducts.map((product) => {
             const status = getStockStatus(product);
             return (
               <li key={product.id} className={`product-item ${status ? getBadgeColorClass(status) : ''}`}>

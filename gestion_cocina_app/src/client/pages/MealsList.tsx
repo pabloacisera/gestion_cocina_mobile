@@ -57,10 +57,10 @@ export function MealsList() {
         setMeals(response.data);
         setPagination(response.pagination);
       } else {
-        setError(response.error || 'Failed to fetch meals.');
+        setError(response.error || 'Error al cargar las comidas.');
       }
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err.message || 'Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
     }

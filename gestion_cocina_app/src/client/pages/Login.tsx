@@ -53,7 +53,7 @@ export function Login() {
     if (!validation.success) {
       const flattenedErrors = validation.error.flatten();
       setErrors(flattenedErrors.fieldErrors);
-      toast.error('Please correct the errors in the form.');
+      toast.error('Por favor, corrija los errores en el formulario.');
       setIsSubmitting(false);
       return;
     }

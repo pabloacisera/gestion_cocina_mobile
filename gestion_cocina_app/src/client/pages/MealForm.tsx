@@ -44,7 +44,7 @@ export function MealForm() {
 
     const fetchProducts = async () => {
       try {
-        const response = await ApiService.get<{ success: boolean; data: ProductWithStock[] }>('/api/products');
+        const response = await ApiService.get<{ success: boolean; data: ProductWithStock[] }>('/api/products?limit=1000');
         if (response.success) {
           const availableProducts = response.data.filter((p: ProductWithStock) => p.quantity > 0);
           setProducts(availableProducts);

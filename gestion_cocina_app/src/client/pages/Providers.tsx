@@ -44,10 +44,10 @@ export function Providers() {
                 setProviders(response.data);
                 setPagination(response.pagination);
             } else {
-                setError(response.error || 'Failed to fetch providers.');
+                setError(response.error || 'Error al obtener los proveedores.');
             }
         } catch (err: any) {
-            setError(err.message || 'An unexpected error occurred.');
+            setError(err.message || 'Ocurrió un error inesperado.');
         } finally {
             setLoading(false);
         }
@@ -70,19 +70,19 @@ export function Providers() {
     };
 
     const handleDeleteProvider = async (id: number, name: string) => {
-        if (!window.confirm(`Are you sure you want to delete provider "${name}"? This action cannot be undone.`)) {
+        if (!window.confirm(`¿Estás seguro de que querés eliminar el proveedor "${name}"? Esta acción no se puede deshacer.`)) {
             return;
         }
         try {
             const response = await ApiService.delete(`/api/providers/${id}`);
             if (response.success) {
-                toast.success(`Provider "${name}" deleted successfully.`);
+                toast.success(`Proveedor "${name}" eliminado correctamente.`);
                 setProviders(providers.filter(p => p.id !== id)); // Remove from state
             } else {
-                toast.error(response.error || `Error deleting provider "${name}".`);
+                toast.error(response.error || `Error al eliminar el proveedor "${name}".`);
             }
         } catch (error: any) {
-            toast.error(error.message || `Error deleting provider "${name}".`);
+            toast.error(error.message || `Error al eliminar el proveedor "${name}".`);
             console.error("Error deleting provider:", error);
         }
     };

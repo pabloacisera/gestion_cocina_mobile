@@ -27,7 +27,7 @@ export function Profile() {
       <div className="profile-page">
         <div className="profile-loading">
           <FontAwesomeIcon icon={faCircleNotch} spin size="lg" />
-          Loading profile...
+          Cargando perfil...
         </div>
       </div>
     );
