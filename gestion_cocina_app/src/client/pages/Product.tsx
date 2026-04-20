@@ -51,6 +51,8 @@ export function Product() {
     quantity: 0,
     measureUnit: 'KG',
     minStock: 0,
+    purchaseUnit: '',
+    conversionFactor: 1,
   });
 
   const fetchProviders = async () => {
@@ -118,13 +120,16 @@ export function Product() {
   // Handlers for the creation/editing form
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setCurrentProductData(prev => ({ ...prev, [name]: value }));
+    // Correctly parse providerId to number, as it comes as string from select
+    const parsedValue = name === 'providerId' ? parseInt(value, 10) : value;
+    setCurrentProductData(prev => ({ ...prev, [name]: parsedValue }));
     if (errors?.[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const numberValue = Math.max(0, parseInt(value, 10) || 0);
+    const parsed = parseFloat(value) || 0;
+    const numberValue = name === 'conversionFactor' ? parsed : Math.max(0, parsed);
     setCurrentProductData(prev => ({ ...prev, [name]: numberValue }));
     if (errors?.[name]) setErrors(prev => ({ ...prev, [name]: undefined }));
   };
@@ -164,7 +169,7 @@ export function Product() {
           toast.success('¡Producto creado correctamente!');
           setProducts([...products, { ...response.data, provider: providers.find(prov => prov.id === response.data.providerId) || null }]);
           const defaultId = filterProviderId ? parseInt(filterProviderId) : (providers.length > 0 ? providers[0].id : 0);
-          setCurrentProductData({ providerId: defaultId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 }); // Reset form
+          setCurrentProductData({ providerId: defaultId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0, purchaseUnit: '', conversionFactor: 1 }); // Reset form
         } else {
           toast.error(response.error || 'Error al crear el producto.');
           if (response.errors) setErrors(response.errors);
@@ -211,7 +216,7 @@ export function Product() {
     // Reset form data if hiding, or keep it if toggling between list and form
     // Respect filterProviderId if it exists
     const defaultProviderId = filterProviderId ? parseInt(filterProviderId) : (providers.length > 0 ? providers[0].id : 0);
-    setCurrentProductData({ providerId: defaultProviderId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0 });
+    setCurrentProductData({ providerId: defaultProviderId, name: '', description: '', quantity: 0, measureUnit: 'KG', minStock: 0, purchaseUnit: '', conversionFactor: 1 });
     setErrors(null); // Clear errors when toggling
   };
 
@@ -314,6 +319,40 @@ export function Product() {
               {errors?.measureUnit && <p className="error-message">{errors.measureUnit[0]}</p>}
             </div>
 
+            <div className="form-field">
+              <label htmlFor="purchaseUnit">
+                Unidad de compra <span className="hint">(opcional — cómo te lo vende el proveedor, ej: bidón, caja, bolsa)</span>
+              </label>
+              <input
+                type="text"
+                id="purchaseUnit"
+                name="purchaseUnit"
+                value={currentProductData.purchaseUnit || ''}
+                onChange={handleFormChange}
+                placeholder="Dejar vacío si se compra por la misma unidad de stock"
+              />
+            </div>
+
+            {currentProductData.purchaseUnit && (
+              <div className="form-field">
+                <label htmlFor="conversionFactor">
+                  ¿Cuántos {MEASURE_UNIT_LABELS[currentProductData.measureUnit] || currentProductData.measureUnit} tiene cada {currentProductData.purchaseUnit}?
+                </label>
+                <input
+                  type="number"
+                  id="conversionFactor"
+                  name="conversionFactor"
+                  value={currentProductData.conversionFactor ?? 1}
+                  onChange={handleNumberChange}
+                  min="0.001"
+                  step="0.001"
+                />
+                <span className="hint">
+                  Ej: si cada bidón trae 5 litros, escribí 5
+                </span>
+              </div>
+            )}
+
             <div className="form-field quantity-unit-fields">
               <div className="quantity-field">
                 <label htmlFor="quantity">Cantidad en stock (*)</label>
@@ -324,6 +363,7 @@ export function Product() {
                   value={currentProductData.quantity}
                   onChange={handleNumberChange}
                   min="0"
+                  step="0.001"
                   required
                 />
                 {errors?.quantity && <p className="error-message">{errors.quantity[0]}</p>}
@@ -337,6 +377,7 @@ export function Product() {
                   value={currentProductData.minStock}
                   onChange={handleNumberChange}
                   min="0"
+                  step="0.001"
                 />
                 {errors?.minStock && <p className="error-message">{errors.minStock[0]}</p>}
               </div>

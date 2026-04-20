@@ -39,7 +39,7 @@ export const Navbar = () => {
                         <span className="icon">
                             <FontAwesomeIcon icon={faUtensils} />
                         </span>
-                        <span className="text">Meals</span>
+                        <span className="text">Comidas</span>
                     </NavLink>
                 </li>
 
@@ -48,7 +48,7 @@ export const Navbar = () => {
                         <span className="icon">
                             <FontAwesomeIcon icon={faUser} />
                         </span>
-                        <span className="text">perfil</span>
+                        <span className="text">Perfil</span>
                     </NavLink>
                 </li>
 

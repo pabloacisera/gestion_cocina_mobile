@@ -6,13 +6,11 @@ const router = Router();
 
 const StockMovementSchema = z.object({
   productId: z.number().int().positive(),
-  quantity: z.number().int().positive(),
-  type: z.enum(["IN", "OUT"]),
-  reason: z.string().optional(),
+  quantity:  z.number().positive(),
+  type:      z.enum(["IN", "OUT"]),
+  reason:    z.string().optional(),
 });
 
-// GET /api/stock-movements
-// Fetches stock movements with filtering by date range (from, to)
 router.get("/", async (req, res, next) => {
   try {
     const { from, to } = req.query;
@@ -25,7 +23,6 @@ router.get("/", async (req, res, next) => {
       dateFilter.gte = new Date(from as string);
     }
     if (to) {
-      // Add one day to 'to' date to include the whole day
       const endDate = new Date(to as string);
       endDate.setDate(endDate.getDate() + 1);
       dateFilter.lt = endDate;
@@ -43,12 +40,12 @@ router.get("/", async (req, res, next) => {
         include: {
           product: {
             include: {
-              provider: true, // Include provider details
+              provider: true,
             },
           },
         },
         orderBy: {
-          createdAt: 'desc', // Order by creation date, most recent first
+          createdAt: 'desc',
         },
       }),
       prisma.stockMovement.count({ where })
@@ -69,7 +66,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// POST /api/stock-movements
 router.post("/", async (req, res, next) => {
   try {
     const validated = StockMovementSchema.safeParse(req.body);

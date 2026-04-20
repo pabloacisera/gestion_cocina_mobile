@@ -184,7 +184,7 @@ export function Providers() {
 
             {showNewProviderForm && !isEditing && (
                 <div className="form-section">
-                    <NewProvider />
+                    <NewProvider onProviderCreated={fetchProviders} />
                 </div>
             )}
             

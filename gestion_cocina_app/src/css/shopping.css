@@ -31,8 +31,9 @@
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 1.25rem;
-  color: #1e293b;
-  border-bottom: 2px solid #f1f5f9;
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-border-subtle);
   padding-bottom: 10px;
 }
 
@@ -46,10 +47,10 @@
 .provider-select, .input-text {
   width: 100%;
   padding: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
-  background: #f8fafc;
+  background: var(--color-surface-secondary);
 }
 
 .new-provider-input {
@@ -59,12 +60,15 @@
 }
 
 .btn-cancel-small {
-  background: #ef4444;
+  background: var(--color-danger);
   color: white;
   border: none;
   padding: 0 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  min-height: var(--touch-min);
+  display: flex;
+  align-items: center;
 }
 
 /* Botón Agregar */
@@ -76,25 +80,27 @@
 }
 
 .btn-add-item {
-  background: #3b82f6;
+  background: var(--color-primary);
   color: white;
   border: none;
   padding: 10px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: background 0.2s;
+  transition: background var(--transition-fast);
+  min-height: var(--touch-min);
 }
 
 .btn-add-item:hover:not(:disabled) {
-  background: #2563eb;
+  background: var(--color-primary-dark);
 }
 
 .btn-add-item:disabled {
-  background: #94a3b8;
+  background: var(--color-text-muted);
   cursor: not-allowed;
 }
 
@@ -419,6 +425,62 @@
 .cart-empty {
   text-align: center;
   padding: 40px;
-  color: #94a3b8;
+  color: var(--color-text-muted);
   font-style: italic;
+}
+
+/* ─── Mobile: tabla → cards ─── */
+@media (max-width: 600px) {
+  .shopping-page {
+    padding: 16px;
+    padding-bottom: 96px;
+  }
+
+  .shopping-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Cart table → cards en mobile */
+  .cart-table thead { display: none; }
+
+  .cart-table, .cart-table tbody, .cart-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .cart-table tr {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+  }
+
+  .cart-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+    font-size: 0.9rem;
+  }
+
+  .cart-table td:last-child { border-bottom: none; }
+
+  .cart-table td::before {
+    content: attr(data-label);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .col-subtotal, .col-total {
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
 }

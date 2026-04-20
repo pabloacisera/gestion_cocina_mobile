@@ -7,7 +7,7 @@ import { faCircleNotch } from "@fortawesome/free-solid-svg-icons"
 import { userAuth } from "../../hooks/userAuth"
 import { ApiService } from "../../services/ApiService";
 
-export function NewProvider() {
+export function NewProvider({ onProviderCreated }: { onProviderCreated?: () => void }) {
     const { user } = userAuth();
 
     const [provider, setProvider] = useState<any>({
@@ -53,6 +53,7 @@ export function NewProvider() {
             
             if (response.success) {
                 toast.success("Proveedor creado exitosamente");
+                onProviderCreated?.(); // Call the prop to refresh the list
                 resetForm(); // Reset form on successful creation
             } else {
                 // If API returns success: false but no throw, display error from API

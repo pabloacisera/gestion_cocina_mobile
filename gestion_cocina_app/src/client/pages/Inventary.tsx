@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ApiService } from '../services/ApiService';
 import { MEASURE_UNIT_LABELS } from '../../server/schemas/productSchema';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle, faCircleNotch, faBoxesStacked, faChevronLeft, faChevronRight, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faExclamationTriangle, faCircleNotch, faBoxesStacked, faChevronLeft, faChevronRight, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { BackButton } from '../components/shared/BackButton';
 import '../../css/inventory.css';
@@ -16,6 +16,8 @@ interface Product {
   measureUnit: string;
   quantity: number;
   minStock: number;
+  purchaseUnit: string | null;
+  conversionFactor: number;
 }
 
 // Define a more specific type for the product with provider details
@@ -41,11 +43,13 @@ export function Inventary() {
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 10, total: 0, totalPages: 0 });
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [stockFilter, setStockFilter] = useState<'all' | 'critical'>('all'); // State for stock filter
 
   const fetchProducts = async (page: number = 1) => {
     try {
       setLoading(true);
       setError(null);
+      // TODO: Add support for server-side filtering for lowStock
       const response = await ApiService.get<{ success: boolean; data: ProductWithProvider[]; pagination: Pagination }>(`/api/products?page=${page}`);
       if (response.success) {
         setProducts(response.data);
@@ -102,9 +106,15 @@ export function Inventary() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Apply search and stock filter
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    if (stockFilter === 'critical') {
+      const status = getStockStatus(p);
+      return matchesSearch && (status === 'critical' || status === 'low');
+    }
+    return matchesSearch; // If stockFilter is 'all', only apply search filter
+  });
 
   if (loading) {
     return (
@@ -131,11 +141,21 @@ export function Inventary() {
   return (
     <div className="inventory-page">
       <div className="inventory-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="inventory-header-top">
           <BackButton />
-          <h1><FontAwesomeIcon icon={faBoxesStacked} /> Inventario</h1>
+          <h1>
+            <FontAwesomeIcon icon={faBoxesStacked} />
+            Inventario
+          </h1>
         </div>
-      </div>
+        <button
+          onClick={() => setStockFilter(stockFilter === 'all' ? 'critical' : 'all')}
+          className={`btn-toggle-filter${stockFilter === 'critical' ? ' active' : ''}`}
+        >
+          <FontAwesomeIcon icon={stockFilter === 'critical' ? faExclamationTriangle : faSearch} />
+          {stockFilter === 'all' ? 'Stock Crítico' : 'Ver todos'}
+        </button>
+      </div> {/* Closing the inventory-header div */}
 
       <div className="search-container">
         <div className="search-wrapper">
@@ -150,61 +170,72 @@ export function Inventary() {
         </div>
       </div>
 
-      {filteredProducts.length === 0 ? (
-        <div className="inventory-empty">
-          {searchTerm ? `No se encontraron resultados para "${searchTerm}" en esta página.` : 'No hay productos en el inventario.'}
-        </div>
-      ) : (
-        <ul className="product-list">
-          {filteredProducts.map((product) => {
-            const status = getStockStatus(product);
-            return (
-              <li key={product.id} className={`product-item ${status ? getBadgeColorClass(status) : ''}`}>
-                <div className="product-info">
-                  <h3>{product.name}</h3>
-                  <p className="provider-name">
-                    Proveedor: {product.provider ? product.provider.name : 'N/A'}
-                  </p>
-                  <p className="stock-min">Stock mín: {product.minStock ?? 0}</p>
-                </div>
-                <div className="stock-details">
-                  <div className="stock-current">
-                    <span className="quantity">{product.quantity ?? 0}</span>
-                    <span className="unit">{MEASURE_UNIT_LABELS[(product as any).measureUnit as keyof typeof MEASURE_UNIT_LABELS] || (product as any).measureUnit}</span>
-                  </div>
-                  {status && (
-                    <span className={`stock-badge ${getBadgeColorClass(status)}`}>
-                      {status === 'critical' ? 'CRÍTICO' : 'BAJO'}
-                    </span>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <div className="inventory-content">
+        {filteredProducts.length === 0 ? (
+          <div className="inventory-empty">
+            <FontAwesomeIcon icon={faBoxesStacked} size="2x" />
+            <p>
+              {stockFilter === 'critical'
+                ? 'No hay productos con stock crítico o bajo.'
+                : searchTerm
+                ? `No se encontraron resultados para "${searchTerm}".`
+                : 'No hay productos en el inventario.'}
+            </p>
+          </div>
+        ) : (
+          <ul className="inventory-list">
+            {filteredProducts.map((product) => {
+              const status = getStockStatus(product);
+              const hasConversion = product.conversionFactor && product.conversionFactor !== 1 && product.purchaseUnit;
+              const purchaseEquiv = hasConversion
+                ? (product.quantity / product.conversionFactor).toFixed(2)
+                : null;
 
-      {pagination.totalPages > 1 && (
-        <div className="pagination">
-          <button 
-            onClick={handlePrevPage} 
-            disabled={pagination.page === 1}
-            className="btn-pagination"
-          >
-            <FontAwesomeIcon icon={faChevronLeft} /> Anterior
-          </button>
-          <span className="page-info">
-            Página {pagination.page} de {pagination.totalPages} ({pagination.total} total)
-          </span>
-          <button 
-            onClick={handleNextPage} 
-            disabled={pagination.page === pagination.totalPages}
-            className="btn-pagination"
-          >
-            Siguiente <FontAwesomeIcon icon={faChevronRight} />
-          </button>
-        </div>
-      )}
+              return (
+                <li key={product.id} className={`inventory-card card-${status || 'ok'}`}>
+                  <div className="card-main">
+                    <div className="card-name">{product.name}</div>
+                    <div className="card-provider">{product.provider?.name || 'Sin proveedor'}</div>
+                  </div>
+                  <div className="card-stock">
+                    <div className="card-quantity">
+                      <span className="quantity-value">{product.quantity}</span>
+                      <span className="quantity-unit">
+                        {MEASURE_UNIT_LABELS[product.measureUnit] || product.measureUnit}
+                      </span>
+                    </div>
+                    {hasConversion && (
+                      <div className="card-purchase-equiv">
+                        ≈ {purchaseEquiv} {product.purchaseUnit}
+                      </div>
+                    )}
+                    <div className="card-min">
+                      mín: {product.minStock} {MEASURE_UNIT_LABELS[product.measureUnit] || product.measureUnit}
+                    </div>
+                    <span className={`status-badge badge-${status || 'ok'}`}>
+                      {status === 'critical' ? '⚠ CRÍTICO' : status === 'low' ? '↓ BAJO' : '✓ OK'}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {pagination.totalPages > 1 && (
+          <div className="pagination">
+            <button onClick={handlePrevPage} disabled={pagination.page === 1} className="btn-pagination">
+              <FontAwesomeIcon icon={faChevronLeft} /> Anterior
+            </button>
+            <span className="page-info">
+              Página {pagination.page} de {pagination.totalPages} ({pagination.total} total)
+            </span>
+            <button onClick={handleNextPage} disabled={pagination.page === pagination.totalPages} className="btn-pagination">
+              Siguiente <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

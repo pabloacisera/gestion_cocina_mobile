@@ -1,31 +1,34 @@
+/* ===== MOBILE NAVBAR ===== */
 .mobile-navbar {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 65px;
-  background-color: var(--color-surface);
+  background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .nav-list {
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: stretch;
   width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 6px 0 4px;
   list-style: none;
 }
 
 .nav-item {
   flex: 1;
-  text-align: center;
+  min-width: 0;
 }
 
 .nav-link {
@@ -34,94 +37,111 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: var(--color-text-secondary);
-  font-size: 0.7rem;
-  transition: color 0.2s ease, transform 0.2s ease;
-  padding: 4px 0;
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: color var(--transition-fast);
+  padding: 6px 4px 8px;
   position: relative;
+  gap: 3px;
+  min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-link .icon {
-  font-size: 1.4rem;
-  margin-bottom: 2px;
-  transition: transform 0.2s ease;
+  font-size: 1.3rem;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), transform var(--transition-fast);
 }
 
 .nav-link .text {
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-transform: capitalize;
 }
 
-.nav-link:hover {
-  color: var(--color-primary);
-}
-
-.nav-link:active .icon {
-  transform: scale(0.9);
-}
-
+/* Estado activo: pill indicator */
 .nav-link.active {
   color: var(--color-primary);
 }
 
 .nav-link.active .icon {
-  transform: scale(1.1);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  transform: scale(1.05);
 }
 
-.nav-link.active::after {
+/* Indicator dot superior */
+.nav-link.active::before {
   content: '';
   position: absolute;
-  bottom: -2px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
+  width: 20px;
+  height: 3px;
   background: var(--color-primary);
-  border-radius: 50%;
+  border-radius: 0 0 var(--radius-full) var(--radius-full);
 }
 
+.nav-link:active .icon {
+  transform: scale(0.92);
+}
+
+/* ─── Desktop (top bar) ─── */
 @media (min-width: 768px) {
   .mobile-navbar {
-    display: flex;
-    align-items: center;
     position: fixed;
     top: 0;
     bottom: auto;
-    left: 0;
-    right: 0;
-    height: auto;
-    min-height: 56px;
-    padding: 8px 0;
     border-top: none;
     border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    padding-bottom: 0;
+    background: var(--color-surface);
   }
 
   .nav-list {
-    max-width: 100%;
-    padding: 0 24px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 6px 16px;
     justify-content: center;
     gap: 4px;
   }
 
   .nav-link {
     flex-direction: row;
-    gap: 6px;
-    font-size: 0.85rem;
-    padding: 8px 10px;
+    gap: 7px;
+    font-size: 0.875rem;
+    padding: 8px 14px;
     border-radius: var(--radius-sm);
-    white-space: nowrap;
+    min-height: 44px;
   }
 
   .nav-link .icon {
-    font-size: 1.1rem;
-    margin-bottom: 0;
+    width: auto;
+    height: auto;
+    background: none !important;
+    font-size: 1.05rem;
   }
 
   .nav-link.active {
     background: var(--color-primary-light);
   }
 
-  .nav-link.active::after {
+  .nav-link.active::before {
     display: none;
   }
 }

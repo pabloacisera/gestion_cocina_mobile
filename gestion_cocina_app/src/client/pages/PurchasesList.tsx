@@ -12,13 +12,15 @@ import '../../css/shopping.css';
 interface PurchaseItem {
   id: number;
   productId: number;
-  quantity: number;
+  purchaseQty: number;
+  stockQty: number;
   unitPrice: number;
   subtotal: number;
   product: {
     id: number;
     name: string;
     measureUnit: string;
+    purchaseUnit: string | null;
   };
 }
 
@@ -136,7 +138,12 @@ export function PurchasesList() {
                     <ul className="items-list">
                       {purchase.items.map((item) => (
                         <li key={item.id}>
-                          <span className="item-qty">{item.quantity} {MEASURE_UNIT_LABELS[item.product.measureUnit as keyof typeof MEASURE_UNIT_LABELS] || item.product.measureUnit}</span>
+                          <span className="item-qty">
+                            {item.purchaseQty} {item.product.purchaseUnit || MEASURE_UNIT_LABELS[item.product.measureUnit as keyof typeof MEASURE_UNIT_LABELS] || item.product.measureUnit}
+                            {item.product.purchaseUnit && (
+                              <span className="stock-qty-hint"> ({item.stockQty.toFixed(2)} {MEASURE_UNIT_LABELS[item.product.measureUnit] || item.product.measureUnit})</span>
+                            )}
+                          </span>
                           <span className="item-name">{item.product.name}</span>
                           <span className="item-price">@ ${item.unitPrice.toFixed(2)} = ${item.subtotal.toFixed(2)}</span>
                         </li>

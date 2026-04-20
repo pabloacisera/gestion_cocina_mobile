@@ -6,14 +6,16 @@ import { MeasureUnitEnum } from "../schemas/productSchema";
 const router = Router();
 
 const PurchaseItemSchema = z.object({
-  productId: z.number().int().optional(),
-  isNew: z.boolean().optional(),
-  name: z.string().optional(),
-  measureUnit: MeasureUnitEnum.optional(),
-  description: z.string().optional(),
-  minStock: z.number().optional(),
-  quantity: z.number().int().positive(),
-  unitPrice: z.number().nonnegative(),
+  productId:        z.number().int().optional(),
+  isNew:            z.boolean().optional(),
+  name:             z.string().optional(),
+  measureUnit:      MeasureUnitEnum.optional(),
+  description:      z.string().optional(),
+  minStock:         z.number().min(0).optional(),
+  purchaseUnit:    z.string().optional(),
+  conversionFactor: z.number().positive().optional(),
+  purchaseQty:      z.number().positive(),
+  unitPrice:       z.number().nonnegative(),
 });
 
 const PurchaseSchema = z.object({
@@ -29,7 +31,9 @@ interface PurchaseItemInput {
   measureUnit?: any;
   description?: string;
   minStock?: number;
-  quantity: number;
+  purchaseUnit?: string;
+  conversionFactor?: number;
+  purchaseQty: number;
   unitPrice: number;
 }
 
@@ -39,7 +43,6 @@ interface PurchaseData {
   notes?: string;
 }
 
-// GET /api/purchases
 router.get("/", async (req, res, next) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -80,7 +83,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// POST /api/purchases
 router.post("/", async (req, res, next) => {
   try {
     const validated = PurchaseSchema.safeParse(req.body);
@@ -94,7 +96,6 @@ router.post("/", async (req, res, next) => {
 
     const { providerId, items, notes } = validated.data as PurchaseData;
 
-    // Verify provider exists
     const provider = await prisma.provider.findUnique({
       where: { id: providerId },
     });
@@ -105,7 +106,6 @@ router.post("/", async (req, res, next) => {
       });
     }
 
-    // Verify all existing products exist
     const existingProductIds = items
       .filter((item) => !item.isNew && item.productId)
       .map((item) => item.productId as number);
@@ -113,7 +113,7 @@ router.post("/", async (req, res, next) => {
     if (existingProductIds.length > 0) {
       const products = await prisma.product.findMany({
         where: { id: { in: existingProductIds } },
-        select: { id: true, name: true },
+        select: { id: true, name: true, conversionFactor: true, purchaseUnit: true },
       });
 
       if (products.length !== existingProductIds.length) {
@@ -124,14 +124,11 @@ router.post("/", async (req, res, next) => {
       }
     }
 
-    // Calculate total amount
     const totalAmount = items.reduce((sum, item) => {
-      return sum + item.quantity * item.unitPrice;
+      return sum + item.purchaseQty * item.unitPrice;
     }, 0);
 
-    // Use transaction to create purchase, items, and stock movements
     const purchase = await prisma.$transaction(async (tx) => {
-      // 1. Create the purchase
       const createdPurchase = await tx.purchase.create({
         data: {
           providerId,
@@ -142,9 +139,15 @@ router.post("/", async (req, res, next) => {
 
       for (const item of items) {
         let finalProductId: number;
+        let stockQty: number;
+        let purchaseUnitToSave: string | null = null;
+        let conversionFactorToSave: number = 1;
 
         if (item.isNew) {
-          // Create new product
+          purchaseUnitToSave = item.purchaseUnit || null;
+          conversionFactorToSave = item.conversionFactor ?? 1;
+          stockQty = item.purchaseQty * conversionFactorToSave;
+
           const newProduct = await tx.product.create({
             data: {
               providerId,
@@ -152,47 +155,55 @@ router.post("/", async (req, res, next) => {
               measureUnit: item.measureUnit || "KG",
               description: item.description || null,
               minStock: item.minStock || 0,
-              quantity: 0, // Will be updated by stock movement or increment below
+              purchaseUnit: purchaseUnitToSave,
+              conversionFactor: conversionFactorToSave,
+              quantity: 0,
             },
           });
           finalProductId = newProduct.id;
         } else {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId! },
+            select: { conversionFactor: true, purchaseUnit: true },
+          });
+          conversionFactorToSave = product?.conversionFactor ?? 1;
+          purchaseUnitToSave = product?.purchaseUnit ?? null;
+          stockQty = item.purchaseQty * conversionFactorToSave;
           finalProductId = item.productId!;
         }
 
-        // 2. Create purchase item
+        const purchaseUnitDisplay = purchaseUnitToSave || (item.isNew ? (item.measureUnit || 'KG') : (item.isNew ? item.measureUnit : ''));
+
         await tx.purchaseItem.create({
           data: {
             purchaseId: createdPurchase.id,
             productId: finalProductId,
-            quantity: item.quantity,
+            purchaseQty: item.purchaseQty,
+            stockQty: stockQty,
             unitPrice: item.unitPrice,
-            subtotal: item.quantity * item.unitPrice,
+            subtotal: item.purchaseQty * item.unitPrice,
           },
         });
 
-        // 3. Create stock movement (IN)
         await tx.stockMovement.create({
           data: {
             productId: finalProductId,
-            quantity: item.quantity,
+            quantity: stockQty,
             type: "IN",
-            reason: `Compra #${createdPurchase.id} - Proveedor: ${provider.name}`,
+            reason: `Compra #${createdPurchase.id} - ${item.purchaseQty} ${purchaseUnitDisplay} → ${stockQty.toFixed(2)} en stock`,
           },
         });
 
-        // 4. Increment product quantity
         await tx.product.update({
           where: { id: finalProductId },
           data: {
             quantity: {
-              increment: item.quantity,
+              increment: stockQty,
             },
           },
         });
       }
 
-      // Return purchase with all related data
       return await tx.purchase.findUnique({
         where: { id: createdPurchase.id },
         include: {

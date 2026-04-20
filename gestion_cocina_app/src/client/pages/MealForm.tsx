@@ -86,7 +86,7 @@ export function MealForm() {
   const handleQuantityChange = (id: string, quantity: number) => {
     setIngredients(ingredients.map(ing => {
       if (ing.id === id) {
-        return { ...ing, quantity: Math.max(1, quantity) };
+        return { ...ing, quantity: Math.max(0.001, quantity) };
       }
       return ing;
     }));
@@ -227,9 +227,10 @@ export function MealForm() {
                         <div className="quantity-input-group">
                           <input
                             type="number"
-                            min="1"
+                            min="0.001"
+                            step="0.001"
                             value={ingredient.quantity}
-                            onChange={(e) => handleQuantityChange(ingredient.id, parseInt(e.target.value) || 1)}
+                            onChange={(e) => handleQuantityChange(ingredient.id, parseFloat(e.target.value) || 0.001)}
                             className={ingredient.quantity > ingredient.availableStock ? 'input-error' : ''}
                           />
                           {getQuantityWarning(ingredient) && (

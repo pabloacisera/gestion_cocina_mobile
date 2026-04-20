@@ -13,6 +13,8 @@ import '../../css/shopping.css';
 interface ProductWithProvider extends Product {
   id: number;
   measureUnit: string;
+  purchaseUnit?: string | null;
+  conversionFactor?: number;
   provider: {
     id: number;
     name: string;
@@ -30,8 +32,10 @@ interface PurchaseItem {
   id: string;
   productId?: number;
   productName: string;
-  measureUnit: string;
-  quantity: number;
+  stockUnit: string;
+  purchaseUnit: string;
+  conversionFactor: number;
+  purchaseQty: number;
   unitPrice: number;
   subtotal: number;
   isNew?: boolean;
@@ -74,7 +78,9 @@ export function Shopping() {
     description: '',
     minStock: 0,
     quantity: 1,
-    unitPrice: 0
+    unitPrice: 0,
+    purchaseUnit: '',
+    conversionFactor: 1,
   });
 
   // New Provider state
@@ -143,8 +149,10 @@ export function Shopping() {
       id: `${product.id}-${Date.now()}`,
       productId: product.id,
       productName: product.name,
-      measureUnit: product.measureUnit,
-      quantity: 1,
+      stockUnit: product.measureUnit,
+      purchaseUnit: product.purchaseUnit || product.measureUnit,
+      conversionFactor: product.conversionFactor ?? 1,
+      purchaseQty: 1,
       unitPrice: 0,
       subtotal: 0,
     };
@@ -161,8 +169,10 @@ export function Shopping() {
     const newItem: PurchaseItem = {
       id: `new-${Date.now()}`,
       productName: newProductData.name,
-      measureUnit: newProductData.measureUnit,
-      quantity: newProductData.quantity,
+      stockUnit: newProductData.measureUnit,
+      purchaseUnit: newProductData.purchaseUnit || newProductData.measureUnit,
+      conversionFactor: newProductData.conversionFactor || 1,
+      purchaseQty: newProductData.quantity,
       unitPrice: newProductData.unitPrice,
       subtotal: newProductData.quantity * newProductData.unitPrice,
       isNew: true,
@@ -178,7 +188,9 @@ export function Shopping() {
       description: '',
       minStock: 0,
       quantity: 1,
-      unitPrice: 0
+      unitPrice: 0,
+      purchaseUnit: '',
+      conversionFactor: 1,
     });
   };
 
@@ -186,11 +198,11 @@ export function Shopping() {
     setPurchaseItems(purchaseItems.filter(item => item.id !== id));
   };
 
-  const handleItemChange = (id: string, field: 'quantity' | 'unitPrice', value: number) => {
+  const handleItemChange = (id: string, field: 'purchaseQty' | 'unitPrice', value: number) => {
     setPurchaseItems(purchaseItems.map(item => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value };
-        updatedItem.subtotal = updatedItem.quantity * updatedItem.unitPrice;
+        updatedItem.subtotal = updatedItem.purchaseQty * updatedItem.unitPrice;
         return updatedItem;
       }
       return item;
@@ -236,10 +248,12 @@ export function Shopping() {
           productId: item.productId,
           isNew: item.isNew,
           name: item.productName,
-          measureUnit: item.measureUnit,
+          measureUnit: item.stockUnit,
+          purchaseUnit: item.purchaseUnit,
+          conversionFactor: item.conversionFactor,
           description: item.description,
           minStock: item.minStock,
-          quantity: item.quantity,
+          purchaseQty: item.purchaseQty,
           unitPrice: item.unitPrice,
         })),
       };
@@ -407,6 +421,27 @@ export function Shopping() {
                             ))}
                           </select>
                         </div>
+                        <div className="form-group">
+                          <label>Unidad de compra (opcional)</label>
+                          <input 
+                            type="text" 
+                            value={newProductData.purchaseUnit || ''} 
+                            onChange={(e) => setNewProductData({...newProductData, purchaseUnit: e.target.value})}
+                            placeholder="bidón, caja, bolsa..."
+                          />
+                        </div>
+                        {newProductData.purchaseUnit && (
+                          <div className="form-group">
+                            <label>Factor de conversión</label>
+                            <input 
+                              type="number" 
+                              min="0.001"
+                              step="0.001"
+                              value={newProductData.conversionFactor} 
+                              onChange={(e) => setNewProductData({...newProductData, conversionFactor: parseFloat(e.target.value) || 1})}
+                            />
+                          </div>
+                        )}
                         <div className="form-group full-width">
                           <label>Descripción (opcional)</label>
                           <textarea 
@@ -419,6 +454,7 @@ export function Shopping() {
                           <input 
                             type="number" 
                             min="0" 
+                            step="0.001"
                             value={newProductData.minStock} 
                             onChange={(e) => setNewProductData({...newProductData, minStock: Number(e.target.value)})}
                           />
@@ -427,7 +463,8 @@ export function Shopping() {
                           <label>Cantidad a comprar (*)</label>
                           <input 
                             type="number" 
-                            min="1" 
+                            min="0.001"
+                            step="0.001"
                             value={newProductData.quantity} 
                             onChange={(e) => setNewProductData({...newProductData, quantity: Number(e.target.value)})}
                           />
@@ -477,15 +514,24 @@ export function Shopping() {
                           {item.productName}
                           {item.isNew && <span className="badge-new">Nuevo</span>}
                         </td>
-                        <td>{MEASURE_UNIT_LABELS[item.measureUnit as keyof typeof MEASURE_UNIT_LABELS] || item.measureUnit}</td>
+                        <td>{MEASURE_UNIT_LABELS[item.purchaseUnit as keyof typeof MEASURE_UNIT_LABELS] || item.purchaseUnit}</td>
                         <td>
-                          <input 
-                            type="number" 
-                            min="1" 
-                            className="input-table"
-                            value={item.quantity} 
-                            onChange={(e) => handleItemChange(item.id, 'quantity', Number(e.target.value))}
-                          />
+                          <div className="qty-input-group">
+                            <input 
+                              type="number" 
+                              min="0.001"
+                              step="0.001"
+                              className="input-table"
+                              value={item.purchaseQty} 
+                              onChange={(e) => handleItemChange(item.id, 'purchaseQty', parseFloat(e.target.value) || 0)}
+                            />
+                            <span className="unit-label">{item.purchaseUnit}</span>
+                          </div>
+                          {item.conversionFactor !== 1 && (
+                            <span className="conversion-hint">
+                              = {(item.purchaseQty * item.conversionFactor).toFixed(2)} {item.stockUnit}
+                            </span>
+                          )}
                         </td>
                         <td>
                           <input 
