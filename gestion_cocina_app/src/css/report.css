@@ -45,11 +45,6 @@
   padding: 20px;
   box-shadow: var(--shadow-md);
   margin-bottom: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
 }
 
 .date-inputs {
@@ -78,13 +73,6 @@
   font-size: 1rem;
   color: var(--color-text-primary);
   background: var(--color-bg);
-  transition: border-color 0.2s;
-}
-
-.date-input-group input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  background: var(--color-surface);
 }
 
 .preset-buttons {
@@ -105,16 +93,6 @@
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.preset-btn:hover {
-  background: var(--color-primary);
-  color: #fff;
-}
-
-.preset-btn:active {
-  transform: scale(0.98);
 }
 
 .btn-apply-filter {
@@ -127,20 +105,6 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.btn-apply-filter:hover {
-  background: var(--color-primary-dark);
-}
-
-.btn-apply-filter:active {
-  transform: scale(0.98);
-}
-
-.btn-apply-filter:disabled {
-  background: var(--color-text-secondary);
-  cursor: not-allowed;
 }
 
 .report-loading, .report-empty {
@@ -155,49 +119,19 @@
   min-height: 120px;
 }
 
-.report-loading .fa-circle-notch {
-  font-size: 1.5rem;
-  color: var(--color-primary);
-}
-
-.report-empty {
-  text-align: center;
-}
-
-/* New styles for Expense Summary Card */
 .expense-summary-card {
-  background: var(--color-surface-secondary); /* Lighter background for distinction */
+  background: var(--color-surface-secondary);
   padding: 20px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   margin-bottom: 20px;
 }
 
-.expense-summary-card h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.expense-summary-card h2 .fa-solid {
-  color: var(--color-primary);
-}
-
 .summary-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Default to single column on mobile */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
-}
-
-@media (min-width: 500px) {
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr); /* Two columns on larger screens */
-  }
 }
 
 .summary-item {
@@ -207,193 +141,167 @@
   box-shadow: var(--shadow-sm);
 }
 
-.summary-item h3 {
-  margin: 0 0 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-}
-
 .summary-item p {
   margin: 0;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .provider-expenses-table {
   margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-border);
-  overflow-x: auto; /* Added for horizontal scroll */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-.provider-expenses-table h3 {
-  margin: 0 0 12px;
-  font-size: 1rem;
-  color: var(--color-text-primary);
+  overflow-x: auto;
 }
 
 .provider-expenses-table table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 320px; /* Minimum width to ensure scroll */
 }
 
-.provider-expenses-table th,
-.provider-expenses-table td {
-  padding: 10px 12px;
+.provider-expenses-table th, .provider-expenses-table td {
+  padding: 10px;
   text-align: left;
   font-size: 0.9rem;
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: 1px solid var(--color-border);
 }
 
-.provider-expenses-table th {
-  background: var(--color-bg);
-  font-weight: 600;
-  color: var(--color-text-secondary);
-}
-
-.provider-expenses-table tr:last-child td {
-  border-bottom: none;
-}
-
-/* Styles for the Stock Movements section */
+/* STOCK MOVEMENTS SECTION */
 .stock-movements-card {
   background: var(--color-surface);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   padding: 20px;
   margin-bottom: 20px;
-  overflow: hidden; /* Ensure content is contained */
 }
 
 .stock-movements-card h2 {
   margin-top: 0;
   margin-bottom: 16px;
   font-size: 1.1rem;
-  color: var(--color-text-primary);
+}
+
+.stock-filter-panel {
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stock-filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 500px) {
+  .stock-filter-row {
+    flex-direction: row;
+  }
+  .stock-filter-row > div {
+    flex: 1;
+  }
+}
+
+.movement-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.movement-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.stock-movements-card h2 .fa-solid {
-  color: var(--color-primary);
+.movement-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-
-.purchases-detail-table {
-  margin-top: 16px;
-  border-top: 1px solid var(--color-border);
-}
-
-.purchases-detail-table th {
-  background: var(--color-bg);
-  padding: 12px 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
+.movement-card-header .date {
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
 }
 
-.purchases-detail-table td {
-  padding: 12px 10px;
-  font-size: 0.9rem;
+.badge-in, .badge-out {
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-in {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.badge-out {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.movement-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.movement-product-name {
+  font-weight: 600;
+  font-size: 1rem;
   color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.purchases-detail-table tr:last-child td {
-  border-bottom: none;
+.movement-card-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
 }
 
-.table-container {
+.movement-provider {
+  color: var(--color-text-secondary);
+}
+
+.movement-qty {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px;
   background: var(--color-surface);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  overflow-x: auto;
-  position: relative;
 }
 
-.table-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 8px;
-  pointer-events: none;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.table-container.scrollable::after {
-  opacity: 1;
-}
-
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 500px;
-}
-
-.report-table th {
-  background: var(--color-bg);
-  padding: 14px 12px;
-  text-align: left;
-  font-size: 0.85rem;
+.btn-pagination {
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
 }
 
-.report-table td {
-  padding: 14px 12px;
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.report-table tr:last-child td {
-  border-bottom: none;
-}
-
-.report-table .type-in {
-  color: var(--color-success);
-  font-weight: 600;
-}
-
-.report-table .type-out {
-  color: var(--color-danger);
-  font-weight: 600;
-}
-
-@media (min-width: 768px) {
-  .report-page {
-    padding-top: 30px;
-    max-width: 800px;
-  }
-
-  .date-inputs {
-    flex-direction: row;
-  }
-
-  .date-input-group {
-    flex: 1;
-  }
-
-  .preset-buttons {
-    justify-content: flex-start;
-  }
-
-  .btn-apply-filter {
-    width: auto;
-    padding: 12px 24px;
-  }
-
-  .report-table {
-    min-width: 600px;
-  }
+.btn-pagination:disabled {
+  background: var(--color-text-secondary);
+  cursor: not-allowed;
 }

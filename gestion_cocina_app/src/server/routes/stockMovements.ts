@@ -13,24 +13,40 @@ const StockMovementSchema = z.object({
 
 router.get("/", async (req, res, next) => {
   try {
-    const { from, to } = req.query;
+    const { from, to, providerId, productName } = req.query;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    let dateFilter: any = {};
-    if (from) {
-      dateFilter.gte = new Date(from as string);
-    }
-    if (to) {
-      const endDate = new Date(to as string);
-      endDate.setDate(endDate.getDate() + 1);
-      dateFilter.lt = endDate;
+    let where: any = {};
+    
+    // Filtro de fechas
+    if (from || to) {
+      where.createdAt = {};
+      if (from) {
+        where.createdAt.gte = new Date(from as string);
+      }
+      if (to) {
+        const endDate = new Date(to as string);
+        endDate.setDate(endDate.getDate() + 1);
+        where.createdAt.lt = endDate;
+      }
     }
 
-    const where = Object.keys(dateFilter).length > 0
-      ? { createdAt: dateFilter }
-      : {};
+    // Filtros de Producto y Proveedor
+    if (providerId || productName) {
+      where.product = {};
+      if (providerId) {
+        where.product.providerId = parseInt(providerId as string);
+      }
+      if (productName) {
+        where.product.name = {
+          contains: productName as string,
+          // Prisma mode: 'insensitive' no es soportado directamente en sqlite de la misma forma,
+          // pero para strings simples funciona bien.
+        };
+      }
+    }
 
     const [stockMovements, total] = await Promise.all([
       prisma.stockMovement.findMany({

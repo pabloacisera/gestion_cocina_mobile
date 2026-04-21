@@ -39,8 +39,24 @@ export function MealForm() {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
-    const defaultName = `Comida del ${new Date().toLocaleDateString('es-AR')}`;
-    setMealName(defaultName);
+    // Load persisted state if exists
+    const savedName = sessionStorage.getItem('meal_form_name');
+    const savedIngredients = sessionStorage.getItem('meal_form_ingredients');
+    
+    if (savedName) {
+      setMealName(savedName);
+    } else {
+      const defaultName = `Comida del ${new Date().toLocaleDateString('es-AR')}`;
+      setMealName(defaultName);
+    }
+
+    if (savedIngredients) {
+      try {
+        setIngredients(JSON.parse(savedIngredients));
+      } catch (e) {
+        console.error('Error parsing saved ingredients', e);
+      }
+    }
 
     const fetchProducts = async () => {
       try {
@@ -59,6 +75,19 @@ export function MealForm() {
 
     fetchProducts();
   }, []);
+
+  // Persist state to sessionStorage
+  useEffect(() => {
+    if (!loading) {
+      sessionStorage.setItem('meal_form_name', mealName);
+      sessionStorage.setItem('meal_form_ingredients', JSON.stringify(ingredients));
+    }
+  }, [mealName, ingredients, loading]);
+
+  const clearPersistence = () => {
+    sessionStorage.removeItem('meal_form_name');
+    sessionStorage.removeItem('meal_form_ingredients');
+  };
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -144,6 +173,7 @@ export function MealForm() {
       
       if (response.success) {
         toast.success('Comida registrada exitosamente');
+        clearPersistence();
         navigate('/meals');
       } else {
         toast.error(response.error || 'Error al registrar comida');
@@ -156,6 +186,7 @@ export function MealForm() {
   };
 
   const handleCancel = () => {
+    clearPersistence();
     navigate('/meals');
   };
 
